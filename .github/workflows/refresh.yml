@@ -1,0 +1,79 @@
+name: Refresh slim snapshots
+
+on:
+  schedule:
+    - cron: '17 14 1 * *'   # 1st of each month, 14:17 UTC (7:17 am Pacific in summer, 6:17 am in winter)
+  workflow_dispatch:
+
+permissions:
+  contents: write            # push the snapshot branches to this repository
+
+concurrency:
+  group: refresh
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      FORKS_TOKEN: ${{ secrets.ODOO_FORKS_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check the forks token
+        run: |
+          if [ -z "$FORKS_TOKEN" ]; then
+            echo "::error::Secret ODOO_FORKS_TOKEN is missing. See README > Setup."
+            exit 1
+          fi
+
+      # Same as clicking "Sync fork" on GitHub. Skipped silently if the fork already matches upstream.
+      - name: Sync the forks with upstream
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ secrets.ODOO_FORKS_TOKEN }}
+        run: |
+          for target in enterprise:20.0 enterprise:saas-19.4 documentation:20.0; do
+            repo=${target%%:*}; branch=${target#*:}
+            echo "Syncing amen-odoo/$repo $branch"
+            gh api -X POST "repos/amen-odoo/$repo/merge-upstream" -f branch="$branch" --jq '.message' \
+              || echo "::warning::Could not sync amen-odoo/$repo $branch (snapshot uses the fork as it is)"
+          done
+
+      - name: Build snapshots
+        env:
+          ENTERPRISE_URL: https://x-access-token:${{ secrets.ODOO_FORKS_TOKEN }}@github.com/amen-odoo/enterprise
+        run: |
+          set -euo pipefail
+          OUT=$RUNNER_TEMP/out
+          scripts/build_slim.sh "$OUT/20.0" "Odoo 20.0" 20.0 20.0 https://github.com/amen-odoo/documentation 20.0
+          # The documentation fork has no saas-19.4 branch, so 19.4 docs come from upstream odoo/documentation.
+          scripts/build_slim.sh "$OUT/saas-19.4" "Odoo 19.4" saas-19.4 saas-19.4 https://github.com/odoo/documentation saas-19.4
+          scripts/build_compare.sh "$OUT/compare" "$OUT/20.0" "$OUT/saas-19.4"
+
+      - name: Check Gemini limits (100 MB, 5,000 files per branch)
+        run: |
+          set -euo pipefail
+          for b in 20.0 saas-19.4 compare; do
+            d=$RUNNER_TEMP/out/$b
+            files=$(find "$d" -type f | wc -l); kb=$(du -sk "$d" | cut -f1)
+            echo "$b: $files files, $((kb / 1024)) MB" | tee -a "$GITHUB_STEP_SUMMARY"
+            if [ "$files" -gt 5000 ] || [ "$kb" -gt 100000 ]; then
+              echo "::error::$b exceeds Gemini's import limit"; exit 1
+            fi
+          done
+
+      - name: Push snapshot branches
+        run: |
+          set -euo pipefail
+          DATE=$(date -u +%Y-%m-%d)
+          for b in 20.0 saas-19.4 compare; do
+            cd "$RUNNER_TEMP/out/$b"
+            git init -q
+            git add -A
+            git -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
+              commit -q -m "Snapshot $b $DATE"
+            git push -q -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}" "HEAD:refs/heads/$b"
+            echo "Pushed $b"
+          done
