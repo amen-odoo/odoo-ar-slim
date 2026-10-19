@@ -1,0 +1,344 @@
+================================================================
+Electronic invoicing (:abbr:`EDI (electronic data interchange)`)
+================================================================
+
+EDI, or electronic data interchange, is the inter-company communication of business documents, such
+as purchase orders and invoices, in a standard format. Sending documents according to an EDI
+standard ensures that the system receiving the message can interpret the information correctly.
+Various EDI file formats are available depending on your company's country.
+
+The EDI feature allows companies to automate administrative processes. It may also be required by
+some governments for fiscal control or to support administrative procedures. Electronic sending of
+documents such as customer invoices, credit notes, or vendor bills is one application of EDI.
+
+Odoo supports e-invoicing in many countries. Refer to the :ref:`country's page
+<accounting/e-invoicing/peppol-country-specific>` for more details.
+
+.. seealso::
+   :doc:`Fiscal localizations documentation <../../fiscal_localizations>`
+
+.. _accounting/e-invoicing/configuration:
+
+Configuration
+=============
+
+By default, the format available in the :ref:`send window <accounting/e-invoicing/generation>`
+depends on the customer's country.
+
+To define a specific e-invoicing format for a customer, go to :menuselection:`Accounting -->
+Customers --> Customers`, access the customer form, go to the :guilabel:`Accounting` tab, and select
+the appropriate :guilabel:`Format` in the :guilabel:`Customer invoices` section.
+
+.. _accounting/e-invoicing/generation:
+
+E-invoice generation
+====================
+
+From a confirmed invoice, click :guilabel:`Send`. In the :guilabel:`Print & Send` window, enable the
+relevant e-invoicing format option (e.g., :guilabel:`by Peppol`), then click :guilabel:`Send` to
+generate and attach the corresponding e-invoicing XML file.
+
+.. _accounting/e-invoicing/peppol:
+
+Peppol
+======
+
+The `Peppol <https://peppol.org/about/>`_ network ensures the exchange of documents and information
+between companies and governmental authorities. It is primarily used for electronic invoicing, and
+its access points (connectors to the Peppol network) allow companies to send electronic documents
+such as customer invoices and credit notes and receive documents like vendor bills and refunds.
+
+In this case, Odoo acts as both an **access point** and an :abbr:`SMP (Service Metadata Publisher)`
+and enables electronic invoicing transactions without the need to send invoices or bills by email or
+post.
+
+.. note::
+   - Peppol registration is **free** and available in Odoo Community.
+   - Supported formats for sending documents include **BIS Billing 3.0, XRechnung CIUS, and
+     NLCIUS**.
+   - | The following **countries** are eligible for **Peppol registration in Odoo**:
+     | Albania, Andorra, Austria, Belgium, Bosnia and Herzegovina, Bulgaria, Croatia, Cyprus, Czech
+       Republic, Denmark, Estonia, Finland, France, Germany, Greece, Holy See (Vatican City State),
+       Hungary, Iceland, Ireland, Italy, Latvia, Liechtenstein, Lithuania, Luxembourg, Malta,
+       Monaco, Montenegro, Netherlands, North Macedonia, Norway, Poland, Portugal, Romania, San
+       Marino, Serbia, Slovakia, Slovenia, Spain, Sweden, Switzerland, Turkey, United Kingdom.
+
+.. _accounting/e-invoicing/peppol-registration:
+
+Registration
+------------
+
+To register on Peppol, go to :menuselection:`Accounting --> Configuration --> Settings` and scroll
+down to the :guilabel:`Electronic Invoicing` section. Then, follow these steps:
+
+#. Click :guilabel:`Activate Peppol` and fill in the following fields:
+
+   - Select an identifying method for your company (VAT, company registry number, or the relevant
+     option) and enter the related information.
+   - :guilabel:`Email`.
+   - :guilabel:`Phone`, including the country code (e.g., `+32` in Belgium).
+
+#. Click :guilabel:`Activate Peppol`. The registration is then pending activation and should
+   be automatically activated within a day.
+
+   .. seealso::
+      `Peppol endpoint - OpenPeppol eDEC Code Lists <https://docs.peppol.eu/edelivery/codelists/>`_
+      (open the "Participant Identifier Schemes" as HTML page)
+
+.. tip::
+   - To disconnect from Peppol, click :guilabel:`Disconnect Peppol`.
+   - To manually trigger the scheduled action used to check the Peppol registration status, enable
+     :ref:`developer mode <developer-mode>`, open the Settings app, go to :menuselection:`Settings
+     --> Technical --> Scheduled actions`, and search for :guilabel:`Peppol: update participant
+     status`. Open the scheduled action, then click :guilabel:`Run Manually`.
+   - To try Peppol without sending real data, enable demo mode by selecting :guilabel:`Odoo Demo
+     ID` as the Peppol endpoint identifier. To switch back to production mode, deregister from the
+     demo mode and :ref:`register <accounting/e-invoicing/peppol-registration>` in production.
+
+Configuration
+-------------
+
+Once Peppol is activated:
+
+#. Go to :menuselection:`Accounting --> Configuration --> Settings`, and scroll down to the
+   :guilabel:`Electronic Invoicing` section.
+#. By default, the :guilabel:`Peppol Contact Email` is automatically filled in using the company's
+   record. This email is used by Odoo to contact you for KYC purposes, information regarding your
+   database, and other exceptional cases. It is recommended *not* to change this email.
+#. Select the :guilabel:`Peppol Participation Role`:
+
+   - :guilabel:`Sending & Receiving`: to both send *and* receive Peppol documents.
+   - :guilabel:`Sending Only`: to send Peppol documents only.
+
+#. If :guilabel:`Sending & Receiving` is selected as the :guilabel:`Peppol Participation Role`,
+   define where Peppol documents should be received:
+
+   - :guilabel:`Recieve as Bills`: If multiple purchase journals are used, select the journal where
+     the bills should be posted in the :guilabel:`Incoming Accounting Journal` field.
+   - :guilabel:`Receive as Documents`: Select the :guilabel:`Document Folder` where the Peppol
+     documents should be stored and the :guilabel:`Document Tags` to assign to them.
+
+.. note::
+   If you are using an access point from a previous provider, deregister from it before registering
+   with the new access point. No action is required if the previous access point was Hermes (BOSA),
+   as this migration is handled automatically.
+
+.. _accounting/e-invoicing/contact-verification:
+
+Contact verification
+--------------------
+
+Before sending an invoice to a contact using Peppol, make sure the contact is registered as a Peppol
+participant. To do so, follow these steps:
+
+#. Go to :menuselection:`Accounting --> Customers --> Customers` and access the customer's form.
+#. In the :guilabel:`Accounting tab`, check the following information in the :guilabel:`Customer
+   invoices` section:
+
+   - :guilabel:`eInvoice format`: Select the relevant format.
+   - Using the :icon:`fa-caret-down` :guilabel:`(down arrow)` icon, make sure the relevant
+     country-specific Peppol endpoint identifier is selected in the dropdown list, then enter the
+     customer's endpoint identifier, usually a Company Registry or VAT number.
+
+#. To verify the contact, enable :ref:`developer mode <developer-mode>` and click
+   :guilabel:`Verify`. Its :guilabel:`Peppol endpoint verification` is marked as :guilabel:`Valid`
+   if the contact is found on the Peppol network.
+
+.. image:: electronic_invoicing/customer-form.png
+   :alt: verify contact registration
+
+.. important::
+   While Odoo prefills the endpoint number based on the information available for a contact,
+   verifying these details with the contact is recommended.
+
+.. _accounting/e-invoicing/send-invoices:
+
+Send invoices
+-------------
+
+All posted invoices that are ready to be sent via Peppol can be viewed in the :guilabel:`Invoices`
+list view in the following ways:
+
+- Use the :icon:`oi-settings-adjust` (:guilabel:`adjust settings`) button to add the
+  :guilabel:`Peppol status` column.
+- Apply the :guilabel:`Peppol Ready` filter in the search bar.
+
+To send the invoice to the customer via Peppol, click :guilabel:`Send` on the confirmed invoice
+form. In the :guilabel:`Send` window, enable the :guilabel:`by Peppol` option and click
+:guilabel:`Send`.
+
+.. tip::
+   - :ref:`Multiple invoices <accounting/invoice/sending-multiple-invoices>` can also be sent in
+     batches via Peppol.
+   - Set the preferred :ref:`Invoice sending <accounting/invoice/sending>` method for a customer to
+     :guilabel:`by Peppol` in the :guilabel:`Customer Invoices` section of the customer form's
+     :guilabel:`Accounting` tab.
+
+The status is updated to :guilabel:`Done` once the invoices have been successfully delivered to the
+contact's access point.
+
+.. _accounting/e-invoicing/receive-vendor-bills:
+
+Receive vendor bills
+--------------------
+
+New documents received via Peppol are checked multiple times a day. Depending on the
+:ref:`registration settings <accounting/e-invoicing/peppol-registration>`, received documents
+are automatically:
+
+- either imported into the purchase journal set in the :guilabel:`Electronic Invoicing` section, and
+  corresponding vendor bills are created as drafts;
+- or received via the :ref:`Documents app
+  <accounting/e-invoicing/receive-vendor-bills-documents-app>`, in the folder set in the
+  :guilabel:`Electronic Invoicing` section.
+
+.. tip::
+   To manually trigger the scheduled action used to retrieve incoming Peppol documents, enable
+   :ref:`developer mode <developer-mode>`, open the Settings app, go to :menuselection:`Settings -->
+   Technical --> Scheduled actions`, and search for :guilabel:`Peppol: retrieve new documents`. Open
+   the scheduled action, then click :guilabel:`Run Manually`.
+
+.. _accounting/e-invoicing/receive-vendor-bills-documents-app:
+
+Vendor bills reception in Documents
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. note::
+   Make sure the :guilabel:`Documents - Import from Peppol` (`documents_account_peppol`) module is
+   :ref:`installed <general/install>`.
+
+To receive vendor bills via the :doc:`Documents app <../../../productivity/documents>`, follow these
+steps:
+
+#. In the Documents app, create a specific :ref:`folder <documents/folders>` or enable :ref:`file
+   centralization <documents/file-centralization>` for :guilabel:`Accounting` documents.
+#. Open the Accounting app, go to :menuselection:`Accounting --> Configuration --> Settings`, and
+   scroll to the :guilabel:`Electronic Invoicing` section.
+#. In the :guilabel:`Document Folder` field, choose the relevant folder.
+#. Use the :guilabel:`Document Tags` field to add tags to incoming Peppol documents for easy
+   identification.
+#. Click :guilabel:`Save`.
+
+Then, open the Documents app, navigate to the appropriate folder, select the relevant vendor bills,
+and click :guilabel:`Create Vendor Bill`. The corresponding vendor bill is then created.
+
+.. note::
+   It is also possible to send :ref:`self-bills <accounting/vendor_bills/self-billing>` via Peppol.
+
+.. _accounting/e-invoicing/extra-fields:
+
+Add extra fields
+----------------
+
+.. important::
+   Adding fields requires the :doc:`Studio <../../../studio>` app.
+
+Odoo supports the most common Peppol fields by default, but additional Peppol data can be included
+when sending e-invoices via Peppol by :ref:`adding extra fields <studio/fields/add>` to the invoice
+using Studio.
+
+The table below shows:
+
+- the extra Peppol fields that can be added. Fields in the:
+
+  - :guilabel:`Main invoice` section are added to the :ref:`form view <studio/views/general/form>`
+    of the invoice
+  - :guilabel:`Invoice lines` section are added to the :ref:`list view
+    <studio/views/multiple-records/list>` of the invoice line
+
+- the data type, which *must* match the :ref:`field type <studio/fields/field-types>` when adding
+  the field using Studio
+- the exact field label that *must* be entered when adding the field using Studio
+
+.. important::
+   Odoo uses a new field's label to automatically generate the technical name of the field. To
+   ensure the field's technical name is formatted correctly, it is crucial to use the exact text
+   from the :guilabel:`Studio field label` column below.
+
++-------------------+-------------------------------+-----------+-----------------------------------------+
+|                   | Peppol technical name (XML)   | Data type | Studio field label                      |
++===================+===============================+===========+=========================================+
+| **Main invoice**  | TaxPointDate                  | Date      | `Peppol tax point date`                 |
+|                   +-------------------------------+-----------+-----------------------------------------+
+|                   | ContractDocumentReference.ID  | Text      | `Peppol contract document reference ID` |
+|                   +-------------------------------+-----------+-----------------------------------------+
+|                   | DespatchDocumentReference.ID  | Text      | `Peppol despatch document reference ID` |
+|                   +-------------------------------+-----------+-----------------------------------------+
+|                   | AccountingCost                | Text      | `Peppol accounting cost`                |
+|                   +-------------------------------+-----------+-----------------------------------------+
+|                   | ProjectReference.ID           | Text      | `Peppol project reference ID`           |
+|                   +-------------------------------+-----------+-----------------------------------------+
+|                   | InvoicePeriodStartDate        | Date      | `Peppol Invoice period Start Date`      |
+|                   +-------------------------------+-----------+-----------------------------------------+
+|                   | InvoicePeriodEndDate          | Date      | `Peppol Invoice period End Date`        |
+|                   +-------------------------------+-----------+-----------------------------------------+
+|                   | OrderReference.ID             | Text      | `Peppol Order Reference ID`             |
++-------------------+-------------------------------+-----------+-----------------------------------------+
+| **Invoice lines** | OrderLineReference/LineID     | Text      | `Peppol order line reference ID`        |
+|                   +-------------------------------+-----------+-----------------------------------------+
+|                   | item.buyersItemIdentification | Text      | `Peppol buyers item ID`                 |
++-------------------+-------------------------------+-----------+-----------------------------------------+
+
+To add a new field to the invoice form view or invoice line list view, as relevant, follow these
+steps:
+
+#. Activate :ref:`developer mode <developer-mode>`.
+#. Navigate to :menuselection:`Accounting --> Customers --> Invoices` (or :menuselection:`Invoicing
+   --> Customers --> Invoices` for Invoicing users).
+#. Open an existing invoice, or click :guilabel:`New`.
+#. Open Studio by clicking the :icon:`oi-studio` (:guilabel:`Toggle Studio`) icon.
+#. If adding a field to invoice line list view, click in the :guilabel:`Invoice Lines` tab and click
+   :guilabel:`Edit List view`.
+#. Click and drag a :guilabel:`Text` or :guilabel:`Date` field from the panel on the left to the
+   desired location in the view on the right.
+#. Enter the :guilabel:`Label` exactly as it appears in the :guilabel:`Studio field label` column in
+   the table above, then click outside the field label to see the :guilabel:`Technical Name` update
+   automatically.
+#. Click :guilabel:`Close` to save all changes.
+
+.. note::
+   The :guilabel:`Technical Name` in Odoo should match the format of
+   `x_studio_peppol_tax_point_date`. If a mistake is made and the technical name is incorrect,
+   :ref:`edit the technical name <studio/fields/properties-technical-name-change>`.
+
+.. tip::
+   After a new field has been created as explained above, it can be :ref:`added to other views
+   <studio/fields/add-existing>` such as the invoice list view.
+
+.. _accounting/e-invoicing/peppol-country-specific:
+
+Country-specific e-invoicing details
+====================================
+
+Refer to the following pages for detailed, country-specific information:
+
+- :doc:`Argentina <electronic_invoicing/argentina>`
+- :doc:`Austria <electronic_invoicing/austria>`
+- :doc:`Belgium <electronic_invoicing/belgium>`
+- :doc:`Brazil <electronic_invoicing/brazil>`
+- :doc:`Chile <electronic_invoicing/chile>`
+- :doc:`Colombia <electronic_invoicing/colombia>`
+- :doc:`Croatia <electronic_invoicing/croatia>`
+- :doc:`Denmark <electronic_invoicing/denmark>`
+- :doc:`Ecuador <electronic_invoicing/ecuador>`
+- :doc:`Egypt <electronic_invoicing/egypt>`
+- :doc:`Estonia <electronic_invoicing/estonia>`
+- :doc:`Finland <electronic_invoicing/finland>`
+- :doc:`Guatemala <electronic_invoicing/guatemala>`
+- :doc:`Hungary <electronic_invoicing/hungary>`
+- :doc:`Ireland <electronic_invoicing/ireland>`
+- :doc:`Italy <electronic_invoicing/italy>`
+- :doc:`Jordan <electronic_invoicing/jordan>`
+- :doc:`Latvia <electronic_invoicing/latvia>`
+- :doc:`Lithuania <electronic_invoicing/lithuania>`
+- :doc:`Luxembourg <electronic_invoicing/luxembourg>`
+- :doc:`Mexico <electronic_invoicing/mexico>`
+- :doc:`Netherlands <electronic_invoicing/netherlands>`
+- :doc:`Norway <electronic_invoicing/norway>`
+- :doc:`Peru <electronic_invoicing/peru>`
+- :doc:`Romania <electronic_invoicing/romania>`
+- :doc:`Saudi Arabia <electronic_invoicing/saudi_arabia>`
+- :doc:`Spain <electronic_invoicing/spain>`
+- :doc:`Spain - Basque Country <electronic_invoicing/basque_country>`
+- :doc:`Türkiye <electronic_invoicing/turkiye>`
+- :doc:`Uruguay <electronic_invoicing/uruguay>`

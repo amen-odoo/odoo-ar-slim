@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates>
+    <t t-name="account_reports.AccountReportLineCell">
+        <t t-call="{{ this.env.template('AccountReportLineCell') }}"/>
+    </t>
+
+    <t t-name="account_reports.AccountReportLineCellCustomizable">
+        <td
+            data-id="line_cell"
+            class="line_cell"
+            t-att-class="this.cellClasses"
+            t-att-data-expression_label="this.props.cell.expression_label"
+        >
+            <div class="wrapper">
+                <t t-if="!this.controller.filters.show_totals or !this.props.line.unfolded">
+                    <t t-if="this.props.cell.info_popup_data">
+                        <a
+                            class="fa fa-question-circle cursor-pointer me-2"
+                            t-on-click="(ev) => this.carryoverPopover(ev)"
+                        />
+                    </t>
+
+                    <t t-if="this.props.cell.cell_label">
+                        <div class="me-auto pe-2 muted">
+                            <t t-component="this.env.component('AccountReportEllipsis')" t-props="{
+                                name: this.props.cell.cell_label,
+                                type: 'string',
+                                maxCharacters: 50,
+                            }"/>
+                        </div>
+                    </t>
+
+                    <div class="content">
+                        <t t-if="this.props.cell.auditable">
+                            <a class="cursor-pointer" t-on-click="() => this.audit()">
+                                <t t-component="this.env.component('AccountReportEllipsis')" t-props="{
+                                    name: this.props.cell.name?.toString(),
+                                    no_format: this.props.cell.no_format,
+                                    type: this.props.cell.figure_type,
+                                    maxCharacters: 50,
+                                }"/>
+                            </a>
+                        </t>
+                        <t t-else="">
+                            <t t-component="this.env.component('AccountReportEllipsis')" t-props="{
+                                name: this.props.cell.name?.toString(),
+                                no_format: this.props.cell.no_format,
+                                type: this.props.cell.figure_type,
+                                maxCharacters: 50,
+                            }"/>
+                        </t>
+                    </div>
+                </t>
+            </div>
+        </td>
+    </t>
+</templates>

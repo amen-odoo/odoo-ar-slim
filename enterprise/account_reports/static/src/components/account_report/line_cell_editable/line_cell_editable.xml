@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates>
+    <t t-name="account_reports.AccountReportLineCellEditable" t-inherit="account_reports.AccountReportLineCellCustomizable" t-inherit-mode="primary">
+        <xpath expr="//div[hasclass('wrapper')]" position="replace">
+            <t t-if="this.hasEditPopupData">
+                <div class="d-flex flex-row justify-content-end align-items-center w-100">
+                    <t t-if="this.isDateTime">
+                        <AccountReportLineCellEditableDateTime t-props="this.editableCellProps"/>
+                    </t>
+                    <t t-elif="this.isBoolean">
+                        <AccountReportLineCellEditableBoolean t-props="this.editableCellProps"/>
+                    </t>
+                    <t t-elif="this.isMany2One">
+                        <AccountReportLineCellEditableMany2One t-props="this.editableCellProps"/>
+                    </t>
+                    <t t-else="">
+                        <AccountReportLineCellEditableLiteral t-props="this.editableCellProps"/>
+                    </t>
+                </div>
+            </t>
+            <t t-else="">$0</t>
+        </xpath>
+    </t>
+</templates>

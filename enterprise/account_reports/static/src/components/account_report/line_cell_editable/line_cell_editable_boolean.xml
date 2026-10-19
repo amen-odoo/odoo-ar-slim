@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates>
+    <t t-name="account_reports.AccountReportLineCellEditableBoolean">
+        <div class="content">
+            <input type="text"
+                   class="o_input w-100 text-end user-select-none"
+                   t-custom-ref="input"
+                   t-att-data-no-format="this.inputNoFormatValue"
+                   t-on-click.prevent.stop="this.toggleBooleanValue"
+                   t-att-value="this.inputValue"
+                   readonly=""
+            />
+        </div>
+        <i class="fa fa-pencil"
+           t-on-click.prevent.stop="this.toggleBooleanValue"
+        />
+    </t>
+</templates>

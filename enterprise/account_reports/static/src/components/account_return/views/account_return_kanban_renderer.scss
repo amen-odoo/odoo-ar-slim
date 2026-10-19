@@ -1,0 +1,30 @@
+.o_account-return-kanban {
+
+    ._o_left_border_success {
+        box-shadow: inset 5px 0 0 0 var(--success);
+    }
+
+    ._o_left_border_danger {
+        box-shadow: inset 5px 0 0 0 var(--danger);
+    }
+
+    ._o_left_border_warning {
+        box-shadow: inset 5px 0 0 0 var(--warning);
+    }
+
+    .o_kanban_record {
+        &:focus {
+            outline: none;
+            box-shadow: inset 0 0 0 2px var(--KanbanColumn__highlight-selected-border);
+        }
+
+        .fa-clock-o {
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        &:hover .fa-clock-o {
+            opacity: 1;
+        }
+    }
+}

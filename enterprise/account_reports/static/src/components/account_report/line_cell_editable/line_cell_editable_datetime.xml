@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates>
+    <t t-name="account_reports.AccountReportLineCellEditableDateTime">
+
+        <t t-if="this.props.cell.auditable">
+            <div class="content text-end cursor-pointer"
+                 t-on-click.stop.capture="this.audit"
+                 t-on-mousedown="this.onMouseDown"
+            >
+                <input type="text"
+                       class="o_input w-100 text-end text-primary"
+                       style="cursor: inherit;"
+                       t-custom-ref="inputDate"
+                       t-att-value="this.inputValue"
+                />
+            </div>
+        </t>
+
+        <t t-else="">
+            <div class="content text-end"
+                 t-on-mousedown="this.onMouseDown"
+            >
+                <input type="text"
+                       class="o_input w-100 text-end text-body cursor-default"
+                       t-custom-ref="inputDate"
+                       t-att-value="this.inputValue"
+                />
+            </div>
+        </t>
+
+        <i class="fa fa-pencil cursor-pointer"
+           t-on-click.prevent.stop="this.onClickEdit"
+        />
+
+    </t>
+</templates>

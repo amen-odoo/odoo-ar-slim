@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<templates>
+    <t t-name="account_reports.account_return_kanban_renderer">
+
+        <div class="o_kanban_renderer o_renderer o_account-return-kanban" t-custom-ref="root">
+            <t t-if="this.groups">
+                <t t-foreach="this.groups" t-as="group" t-key="group.key">
+                    <t t-if="group.count > 0">
+                        <span class="o_account_return_padding d-block pt-4 fw-bold fs-4">
+                            <t t-out="group.displayName"/>
+                        </span>
+                        <t t-call="account_reports.return_list" list="group.list"/>
+                    </t>
+                </t>
+            </t>
+            <t t-else="" t-call="account_reports.return_list" list="this.props.list"/>
+            <t t-if="this.showNoContentHelper">
+                <ActionHelper noContentHelp="this.props.noContentHelp"/>
+            </t>
+        </div>
+    </t>
+
+    <t t-name="account_reports.return_list">
+        <t t-foreach="list.records" t-as="record" t-key="record.id">
+            <AccountReturnKanbanRecord
+                record="record"
+                archInfo="this.props.archInfo"
+                Compiler="this.props.Compiler"
+                readonly="false"
+                forceGlobalClick="false"
+                canOpenRecords="this.props.archInfo.canOpenRecords"
+                canResequence="false"
+                deleteRecord.bind="this.deleteRecord"
+                openAction="this.props.archInfo.openAction"
+                openRecord.bind="this.openRecord"
+            />
+        </t>
+    </t>
+</templates>
